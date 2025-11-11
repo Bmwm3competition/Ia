@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A.s - IA de Motos</title>
+    <meta name="description" content="A.s: IA focada em tudo sobre motos.">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Base */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000 url('https://www.webmotors.com.br/motos-novas/estoque/bmw/s-1000-rr') no-repeat center/cover fixed;
+            background-blend-mode: multiply;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.5);
+        }
+        .logo {
+            width: 40px; height: 40px;
+            background: url('https://seeklogo.com/images/B/bmw-s1000-rr-logo-7B7B7B7B7B-vector.svg') no-repeat center/contain;
+            background-size: cover;
+            border-radius: 50%;
+            border: 2px solid #333;
+        }
+        .title { font-size: 1.5rem; font-weight: 700; }
+
+        /* Chat Wrapper */
+        .chat-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .chat-container {
+            flex: 1;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem 1.5rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+        .chat-container::-webkit-scrollbar { display: none; }
+
+        /* Input fixo */
+        .input-area {
+            padding: 0 1.5rem 1rem;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+        }
+        .input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+        .input-box {
+            flex: 1;
+            background: rgba(26,26,26,0.8);
+            border: 1px solid #333;
+            border-radius: 1rem;
+            padding: 0.75rem 1rem;
+            color: #fff;
+            font-size: 1rem;
+            resize: none;
+            min-height: 50px;
+            max-height: 150px;
+            overflow-y: auto;
+            outline: none;
+        }
+        .input-box:focus {
+            border-color: #00ff9d;
+            box-shadow: 0 0 0 1px #00ff9d;
+        }
+        .send-button {
+            background: linear-gradient(135deg, #00ff9d, #00cc7a);
+            color: #000;
+            border: none;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            transition: all 0.2s;
+        }
+        .send-button:hover { transform: scale(1.05); }
+        .send-button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Mensagens */
+        .message {
+            max-width: 80%;
+            padding: 1rem 1.2rem;
+            border-radius: 1rem;
+            word-wrap: break-word;
+        }
+        .user-message {
+            align-self: flex-end;
+            background: #1f1f1f;
+            border-bottom-right-radius: 0.3rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .ai-message {
+            align-self: flex-start;
+            background: rgba(17,17,17,0.9);
+            border: 1px solid #333;
+            border-bottom-left-radius: 0.3rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .ai-header {
+            display: flex; align-items: center; gap: 0.5rem;
+            margin-bottom: 0.5rem; font-size: 0.9rem; color: #00ff9d;
+        }
+        .ai-name { font-weight: 600; }
+
+        /* Loading */
+        .loading { display: flex; gap: 0.5rem; padding: 0.5rem 0; }
+        .dot {
+            width: 8px; height: 8px;
+            background: #00ff9d;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce {
+            0%,80%,100% { transform: translateY(0) }
+            40% { transform: translateY(-8px) }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo"></div>
+        <div class="title">A.s</div>
+    </header>
+
+    <!-- Chat -->
+    <div class="chat-wrapper">
+        <div class="chat-container" id="chatContainer">
+            <div class="message ai-message">
+                <div class="ai-header">
+                    <div class="logo" style="width:24px;height:24px;background:url('https://seeklogo.com/images/B/bmw-s1000-rr-logo-7B7B7B7B7B-vector.svg') no-repeat center/contain;background-size:cover;border:1px solid #333;"></div>
+                    <span class="ai-name">A.s</span>
+                </div>
+                <p>Tudo bem, sou <strong>A.s</strong>, sua IA focada em tudo sobre motos. 🏍️</p>
+                <p style="margin-top:0.5rem;font-size:0.9rem;color:#aaa;">Pergunte sobre qualquer moto, peça, estilo ou manutenção!</p>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-wrapper">
+                <textarea id="userInput" class="input-box" placeholder="Fale sobre motos..." rows="1"></textarea>
+                <button id="sendButton" class="send-button" disabled>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elementos
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+
+        // Ajuste de altura
+        function adjustHeight() {
+            userInput.style.height = 'auto';
+            userInput.style.height = userInput.scrollHeight + 'px';
+        }
+        userInput.addEventListener('input', () => {
+            adjustHeight();
+            sendButton.disabled = userInput.value.trim() === '';
+        });
+
+        // Enviar com Enter
+        userInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!sendButton.disabled) sendMessage();
+            }
+        });
+        sendButton.addEventListener('click', sendMessage);
+
+        // Enviar mensagem
+        async function sendMessage() {
+            const q = userInput.value.trim();
+            if (!q) return;
+            addMessage('user', q);
+            userInput.value = ''; adjustHeight(); sendButton.disabled = true;
+
+            const msg = addMessage('ai', '<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>');
+
+            try {
+                // Chama Gemini para resposta real sobre motos
+                const resposta = await callGeminiAPI(q);
+                msg.querySelector('.message-content').innerHTML = formatAnswer(resposta);
+            } catch (error) {
+                // Fallback com simulação avançada
+                const fallback = simulateResponse(q);
+                msg.querySelector('.message-content').innerHTML = formatAnswer(fallback);
+            }
+        }
+
+        // Chamar Gemini API
+        const GEMINI_API_KEY = 'AIzaSyD-jd6OcusFv8oQZWwAydmFtPo1Ib1GQ1M';
+        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+
+        async function callGeminiAPI(pergunta) {
+            const prompt = `Você é A.s, especialista em motos. Responda de forma completa e técnica sobre: "${pergunta}". Use **negrito** para termos chave, listas para specs, e termine com uma pergunta engajadora. Foque em mecânica, modelos, estilos (naked, carenadas, trail, etc.), manutenção.`;
+
+            const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }]
+                })
+            });
+
+            if (!response.ok) throw new Error('API Error');
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text.trim();
+        }
+
+        // Adicionar mensagem
+        function addMessage(sender, content) {
+            const div = document.createElement('div');
+            div.className = `message ${sender}-message`;
+            div.innerHTML = sender === 'ai' ? `
+                <div class="ai-header">
+                    <div class="logo" style="width:24px;height:24px;background:url('https://seeklogo.com/images/B/bmw-s1000-rr-logo-7B7B7B7B7B-vector.svg') no-repeat center/contain;background-size:cover;border:1px solid #333;"></div>
+                    <span class="ai-name">A.s</span>
+                </div>
+                <div class="message-content">${content}</div>
+            ` : `<div class="message-content">${escapeHtml(content)}</div>`;
+            chatContainer.appendChild(div);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return div;
+        }
+
+        function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+        function formatAnswer(t) { 
+            return t
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/^- (.*)$/gm, '<br>• $1')
+                .replace(/\n/g, '<br>');
+        }
+
+        // Respostas simuladas avançadas (fallback)
+        function simulateResponse(q) {
+            const texto = q.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ');
+            
+            if (texto.includes('s1000rr') || texto.includes('bmw') || texto.includes('s 1000 rr')) {
+                return `**BMW S1000RR (2023+)**: Superbike carenada com motor inline-4 de 999cc, **210 cv** a 13.750 rpm, torque de **113 Nm** a 11.000 rpm. Aceleração 0-100 km/h em **2.9s**, velocidade máxima >**300 km/h**. Peso seco: 197 kg. Equipada com quickshifter bidirecional, modos de pilotagem, ABS cornering, controle de tração e winglets aerodinâmicos. Preço médio no Brasil: R$ 150.000+ para 0km.<br><br>• **Prós**: Performance insana na pista, eletrônicos avançados.<br>• **Contras**: Posição agressiva para rua.<br><br>Quer saber sobre customizações ou comparação com a Yamaha R1?`;
+            }
+            
+            if (texto.includes('naked') || texto.includes('nu') || texto.includes('street')) {
+                return `**Naked Bikes**: Motos sem carenagem para pilotagem urbana e curvas. Foco em torque em baixa rotação e posição ereta.<br><br>• **Exemplos populares**: Yamaha MT-07 (**74 cv**, 689cc, ~R$ 50.000), Kawasaki Z900 (**125 cv**, 948cc, ~R$ 70.000), BMW F900R (**105 cv**, 895cc, ~R$ 60.000).<br>• **Vantagens**: Manobrabilidade na cidade, custo-benefício.<br>• **Dicas**: Troque óleo a cada 6.000 km, verifique freios radial.<br><br>Qual naked você pilota ou quer comprar?`;
+            }
+            
+            if (texto.includes('carenada') || texto.includes('sport') || texto.includes('superbike')) {
+                return `**Carenadas/Sport**: Projetadas para velocidade e pista, com aerodinâmica e alta rotação.<br><br>• **Exemplos**: Honda CBR1000RR (**214 cv**, 999cc, ~R$ 120.000), Suzuki GSX-R1000 (**202 cv**, 999cc, ~R$ 110.000).<br>• **Especs típicas**: Quickshifter, launch control, suspensão Öhlins.<br>• **Manutenção**: Corrente lubrificada semanal, pastilhas de freio a cada 10.000 km.<br><br>Qual sport te interessa mais?`;
+            }
+            
+            if (texto.includes('trail') || texto.includes('adventure')) {
+                return `**Trail/Adventure**: Versáteis para estrada e off-road leve, com rodas mistas e proteção.<br><br>• **Exemplos**: Triumph Tiger 900 (**94 cv**, 888cc, ~R$ 80.000), Yamaha Ténéré 700 (**72 cv**, 689cc, ~R$ 60.000).<br>• **Destaques**: Suspensão ajustável, tanque grande (20L+).<br>• **Dicas**: Pneus 90/10 asfalto/terra, filtro de ar lavável.<br><br>Planejando uma viagem de trail?`;
+            }
+            
+            if (texto.includes('big trail') || texto.includes('gs')) {
+                return `**Big Trail**: Para aventuras extremas, com motor boxer e capacidade off-road.<br><br>• **Exemplos**: BMW R1250GS (**136 cv**, 1254cc, ~R$ 130.000), KTM 1290 Super Adventure (**160 cv**, 1301cc, ~R$ 140.000).<br>• **Especs**: Telelever/Paralever, modos rally, altura 850-950mm.<br>• **Manutenção**: Óleo a cada 10.000 km, corrente X-ring.<br><br>Qual big trail é a sua favorita?`;
+            }
+            
+            if (texto.includes('touring') || texto.includes('gt')) {
+                return `**Touring**: Conforto para longas distâncias, com malas e para-brisa.<br><br>• **Exemplos**: BMW R1250RT (**136 cv**, 1254cc, ~R$ 140.000), Honda Gold Wing (**126 cv**, 1833cc, ~R$ 200.000+).<br>• **Recursos**: Cruise control, aquecimento de assentos, áudio.<br>• **Dicas**: Alinhamento a cada 5.000 km, bateria AGM.<br><br>Qual touring para sua próxima viagem?`;
+            }
+            
+            if (texto.includes('óleo') || texto.includes('manutenção')) {
+                return `**Manutenção Básica de Motos**:<br>1. **Óleo**: Troque a cada 5-10k km (10W40 sintético para maioria).<br>2. **Filtros**: Ar e combustível anualmente.<br>3. **Freios**: Inspecione pastilhas a cada 5k km.<br>4. **Corrente**: Limpe e lubrifique semanalmente.<br>• **Custo médio**: R$ 300-500 por revisão.<br><br>Qual peça específica?`;
+            }
+            
+            if (texto.includes('preço') || texto.includes('comprar')) {
+                return `**Preços de Motos no Brasil (2025, aprox.)**:<br>• **Naked**: R$ 40-80k (ex: CB500F R$ 45k).<br>• **Sport**: R$ 100-150k (ex: S1000RR R$ 150k).<br>• **Trail**: R$ 60-100k (ex: Africa Twin R$ 90k).<br>• **Dica**: Verifique Webmotors ou OLX para 0km usadas.<br><br>Qual modelo você busca?`;
+            }
+            
+            // Resposta genérica inteligente
+            return `**Tudo sobre Motos com A.s**! Seja mecânica (troca de óleo, freios), estilos (naked para cidade, carenadas para pista, trail para aventura), ou modelos específicos (S1000RR 210cv, MT-07 74cv), eu respondo com detalhes técnicos e dicas práticas.<br><br>• **Estilos Rápidos**: Naked (urbana), Sport (velocidade), Trail (versátil), Touring (conforto).<br><br>O que você quer saber exatamente? Modelo, manutenção ou recomendação?`;
+        }
+
+        // Inicialização
+        window.addEventListener('load', () => {
+            adjustHeight();
+            sendButton.disabled = true;
+        });
+    </script>
+</body>
+</html>
